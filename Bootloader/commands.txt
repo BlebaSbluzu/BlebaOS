@@ -1,0 +1,6 @@
+**For compiling asm to bin**
+nasm -f bin boot.asm -o boot.bin
+
+
+run bootloader in qemu
+qemu-system-x86_64 -drive format=raw,file=boot.bin
