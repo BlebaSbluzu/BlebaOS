@@ -4,3 +4,18 @@ nasm -f bin boot.asm -o boot.bin
 
 run bootloader in qemu
 qemu-system-x86_64 -drive format=raw,file=boot.bin
+
+
+nasm -f bin BlebaBoot.asm -o boot.bin
+
+ls -l boot.bin
+ shows how many bytes :)
+
+
+nasm -f bin BlebaKernel.asm -o BlebaKernel.bin
+
+
+cat boot.bin BlebaKernel.bin  > BlebaImage.bin 
+ makes one bin file of the 2, like disk 0, disk 1
+
+qemu-system-x86_64 -drive format=raw,file=BlebaImage.bin
