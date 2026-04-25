@@ -8,5 +8,6 @@ void console_putc(char c);
 void console_write(const char* str);
 void console_write_hex(u32 value);
 void console_write_dec(u32 value);
-
+void console_set_color(u8 color) ;
+void console_update_cursor(void);
 #endif

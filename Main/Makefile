@@ -38,8 +38,9 @@ KERNEL_C_SRC = \
 	$(KERNEL_DIR)/timer.c \
 	$(KERNEL_DIR)/keyboard.c \
 	$(KERNEL_DIR)/shell.c \
-	$(KERNEL_DIR)/panic.c
-
+	$(KERNEL_DIR)/panic.c \
+	$(KERNEL_DIR)/paging.c \
+	$(KERNEL_DIR)/memory.c
 # Object files
 KERNEL_ASM_OBJ = \
 	$(BUILD_DIR)/entry.o \
@@ -53,8 +54,9 @@ KERNEL_C_OBJ = \
 	$(BUILD_DIR)/timer.o \
 	$(BUILD_DIR)/keyboard.o \
 	$(BUILD_DIR)/shell.o \
-	$(BUILD_DIR)/panic.o
-
+	$(BUILD_DIR)/panic.o \
+	$(BUILD_DIR)/paging.o \
+	$(BUILD_DIR)/memory.o
 KERNEL_OBJ = $(KERNEL_ASM_OBJ) $(KERNEL_C_OBJ)
 
 # Default target
@@ -82,7 +84,7 @@ $(BUILD_DIR)/interrupts.o: $(KERNEL_DIR)/interrupts.asm | $(BUILD_DIR)
 # --------------------------------------------------
 # Kernel C files
 # --------------------------------------------------
-$(BUILD_DIR)/main.o: $(KERNEL_DIR)/main.c $(INCLUDE_DIR)/console.h $(INCLUDE_DIR)/idt.h $(INCLUDE_DIR)/irq.h $(INCLUDE_DIR)/timer.h $(INCLUDE_DIR)/keyboard.h $(INCLUDE_DIR)/shell.h | $(BUILD_DIR)
+$(BUILD_DIR)/main.o: $(KERNEL_DIR)/main.c $(INCLUDE_DIR)/console.h $(INCLUDE_DIR)/idt.h $(INCLUDE_DIR)/irq.h $(INCLUDE_DIR)/timer.h $(INCLUDE_DIR)/keyboard.h $(INCLUDE_DIR)/shell.h $(INCLUDE_DIR)/paging.h $(INCLUDE_DIR)/memory.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/console.o: $(KERNEL_DIR)/console.c $(INCLUDE_DIR)/common.h $(INCLUDE_DIR)/console.h | $(BUILD_DIR)
@@ -100,12 +102,17 @@ $(BUILD_DIR)/timer.o: $(KERNEL_DIR)/timer.c $(INCLUDE_DIR)/common.h $(INCLUDE_DI
 $(BUILD_DIR)/keyboard.o: $(KERNEL_DIR)/keyboard.c $(INCLUDE_DIR)/common.h $(INCLUDE_DIR)/console.h $(INCLUDE_DIR)/irq.h $(INCLUDE_DIR)/shell.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/shell.o: $(KERNEL_DIR)/shell.c $(INCLUDE_DIR)/console.h $(INCLUDE_DIR)/shell.h $(INCLUDE_DIR)/timer.h $(INCLUDE_DIR)/panic.h | $(BUILD_DIR)
+$(BUILD_DIR)/shell.o: $(KERNEL_DIR)/shell.c $(INCLUDE_DIR)/console.h $(INCLUDE_DIR)/shell.h $(INCLUDE_DIR)/timer.h $(INCLUDE_DIR)/panic.h $(INCLUDE_DIR)/memory.h $(INCLUDE_DIR)/paging.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/panic.o: $(KERNEL_DIR)/panic.c $(INCLUDE_DIR)/console.h $(INCLUDE_DIR)/panic.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(BUILD_DIR)/paging.o: $(KERNEL_DIR)/paging.c $(INCLUDE_DIR)/paging.h $(INCLUDE_DIR)/common.h $(INCLUDE_DIR)/console.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/memory.o: $(KERNEL_DIR)/memory.c $(INCLUDE_DIR)/memory.h $(INCLUDE_DIR)/common.h $(INCLUDE_DIR)/console.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 # --------------------------------------------------
 # Link kernel
 # --------------------------------------------------

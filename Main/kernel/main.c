@@ -4,16 +4,19 @@
 #include "timer.h"
 #include "keyboard.h"
 #include "shell.h"
+#include "paging.h"
+#include "memory.h"
 
 void kernel_main(void) {
     console_init();
-    console_write("BlebaOS kernel started.\n");
-    console_write("Stage 4 bring-up...\n");
+    console_write("kernel started.\n");
 
     idt_init();
     irq_init();
     timer_init(100);
     keyboard_init();
+    paging_init();
+    memory_init();
 
     console_write("IDT loaded.\n");
     console_write("PIC remapped.\n");

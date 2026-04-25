@@ -2,6 +2,8 @@
 #include "shell.h"
 #include "timer.h"
 #include "panic.h"
+#include "memory.h"
+#include "paging.h"
 
 static char shell_buffer[128];
 static int shell_length = 0;
@@ -30,7 +32,7 @@ static int str_starts_with(const char* str, const char* prefix) {
 
 static void shell_execute(const char* command) {
     if (str_equal(command, "help")) {
-        console_write("Commands: help, clear, about, ticks, panic, echo, cowsay\n");
+        console_write("Commands: help, clear, about, ticks, panic, echo, cowsay, mem, alloc\n");
     }
     else if (str_equal(command, "clear")) {
         console_clear();
@@ -41,6 +43,59 @@ static void shell_execute(const char* command) {
     console_write("        (__)\\       )\\/\\\n");
     console_write("            ||----w |\n");
     console_write("            ||     ||\n");
+}
+else if (str_starts_with(command, "cowsay ")) {
+    const char* msg = command + 7;
+
+    console_write(" ----\n< ");
+    console_write(msg);
+    console_write(" >\n ----\n");
+
+    console_write("        ^__^\n");
+    console_write("        (oo)\\_______\n");
+    console_write("        (__)\\       )\\/\\\n");
+    console_write("            ||----w |\n");
+    console_write("            ||     ||\n");
+}
+else if (str_equal(command, "mem")) {
+    console_write("Paging: ");
+    console_write(paging_is_enabled() ? "enabled\n" : "disabled\n");
+
+    console_write("Heap start: ");
+    console_write_hex(memory_get_heap_start());
+    console_write("\n");
+
+    console_write("Heap current: ");
+    console_write_hex(memory_get_heap_current());
+    console_write("\n");
+
+    console_write("Heap used: ");
+    console_write_dec(memory_get_heap_used());
+    console_write(" bytes\n");
+}
+
+
+
+else if (str_starts_with(command, "alloc ")) {
+    const char* num = command + 6;
+    u32 size = 0;
+
+    while (*num >= '0' && *num <= '9') {
+        size = size * 10 + (*num - '0');
+        num++;
+    }
+
+    void* ptr = kmalloc(size);
+
+    if (ptr == NULL) {
+        console_write("Allocation failed.\n");
+    } else {
+        console_write("Allocated ");
+        console_write_dec(size);
+        console_write(" bytes at ");
+        console_write_hex((u32)ptr);
+        console_write("\n");
+    }
 }
     else if (str_equal(command, "about")) {
         console_write("BlebaOS Stage 4 shell\n");
