@@ -3,7 +3,7 @@ ORG 0x7C00                      ; BIOS loads us here
 
 KERNEL_LOAD_SEG   EQU 0x1000    ; real-mode segment where we load kernel
 KERNEL_ENTRY      EQU 0x00010000 ; full 32 bit address for kernel entry (protected)
-KERNEL_SECTORS    EQU 20       ; how many sectors of kernel to read 
+KERNEL_SECTORS    EQU 50       ; how many sectors of kernel to read 
 
 
 

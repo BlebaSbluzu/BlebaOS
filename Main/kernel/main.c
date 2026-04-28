@@ -6,18 +6,21 @@
 #include "shell.h"
 #include "paging.h"
 #include "memory.h"
+#include "scheduler.h"
+#include "fs.h"
 
 void kernel_main(void) {
     console_init();
     console_write("kernel started.\n");
-
+    fs_init();
+    task_init();
     idt_init();
     irq_init();
     timer_init(100);
     keyboard_init();
     paging_init();
     memory_init();
-
+    
     console_write("IDT loaded.\n");
     console_write("PIC remapped.\n");
     console_write("Timer running.\n");

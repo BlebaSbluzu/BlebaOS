@@ -76,8 +76,28 @@ static const char* exception_messages[] = {
     "Reserved"
 };
 
+static void page_fault_handler(u32 err_code) {
+    u32 faulting_address;
+
+    __asm__ volatile ("mov %%cr2, %0" : "=r"(faulting_address));
+
+    console_write("\nPAGE FAULT!\n");
+    console_write("Address: ");
+    console_write_hex(faulting_address);
+    console_write("\n");
+
+    console_write("Error code: ");
+    console_write_hex(err_code);
+    console_write("\n");
+
+    panic("Page fault");
+}
+
 void isr_handler(u32 int_no, u32 err_code) {
-    (void)err_code;
+    if (int_no == 14) {
+        page_fault_handler(err_code);
+        return;
+    }
 
     console_write("\nEXCEPTION: ");
 

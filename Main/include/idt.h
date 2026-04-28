@@ -2,7 +2,7 @@
 #define IDT_H
 
 #include "common.h"
-
+ 
 struct idt_entry {
     u16 base_low;
     u16 selector;

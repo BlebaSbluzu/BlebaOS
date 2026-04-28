@@ -2,16 +2,11 @@
 #include "console.h"
 #include "paging.h"
 
-/*
- * Legacy 32-bit paging:
- * - Page directory has 1024 entries
- * - Each page table has 1024 entries
- * - Each page is 4096 bytes
- * - One page table maps 1024 * 4096 = 4MB
- */
-
+// Page directory has 1024 entries
 static u32 page_directory[1024] __attribute__((aligned(4096)));
 static u32 first_page_table[1024] __attribute__((aligned(4096)));
+// Each page table has 1024 entries and each page is 4096 bytes
+// One page table maps 1024 * 4096 = 4MB
 
 static int paging_enabled = 0;
 
@@ -41,23 +36,14 @@ static void enable_paging(void) {
 }
 
 void paging_init(void) {
-    /*
-     * First, mark every page directory entry as not present.
-     * 0x2 = writable, but not present.
-     */
+    //  every page directory as 0x2 - writable but not present
     for (u32 i = 0; i < 1024; i++) {
         page_directory[i] = 0x00000002;
     }
 
-    /*
-     * Identity-map the first 4MB.
-     * This means virtual address == physical address.
-     *
-     * Example:
-     * 0x000B8000 maps to 0x000B8000
-     *
-     * Important because VGA memory, kernel, and stack are currently all in low memory.
-     */
+
+    //  Identity-map the first 4MB.
+
     for (u32 i = 0; i < 1024; i++) {
         first_page_table[i] = (i * 0x1000) | 3;
     }

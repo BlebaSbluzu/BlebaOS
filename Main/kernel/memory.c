@@ -2,20 +2,25 @@
 #include "console.h"
 #include "memory.h"
 
-/*
- * Simple bump allocator.
- *
- * This does allocation, but not free().
- * It is simple, predictable, and appropriate for this project scope.
- */
 
-#define HEAP_START 0x00100000  /* 1MB */
-#define HEAP_END   0x00400000  /* 4MB */
+#define HEAP_START 0x00100000  
+#define HEAP_END   0x00400000  
 
 static u32 heap_current = HEAP_START;
 
 static u32 align_4(u32 value) {
-    return (value + 3) & ~3;
+    u32 remainder = value % 4;
+
+    // Helps with 32 bit. If value is already divisible by 4, keep it.
+    // Otherwise, add enough bytes to reach the next multiple of 4.
+    //basically makes sure the value fits into a the 4 byte wide 
+    // 32 bit value in the 32 bit system (its neater)
+
+  if (remainder == 0) {
+        return value;
+    }
+
+    return value + (4 - remainder);
 }
 
 void memory_init(void) {

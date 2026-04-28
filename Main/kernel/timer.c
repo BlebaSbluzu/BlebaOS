@@ -2,12 +2,13 @@
 #include "console.h"
 #include "irq.h"
 #include "timer.h"
-
+#include "scheduler.h"
 static volatile u32 timer_ticks = 0;
 
 static void timer_callback(void) {
     timer_ticks++;
 
+    scheduler_tick();
     // if ((timer_ticks % 100) == 0) {
     //     console_write("[TICK ");
     //     console_write_dec(timer_ticks);

@@ -26,22 +26,23 @@ static void console_newline(void) {
 
     if (console_row < VGA_HEIGHT - 1) {
         console_row++;
-        console_update_cursor();
-        return;
-    }
+    } else {
+        // scroll everything up
+        for (u32 y = 1; y < VGA_HEIGHT; y++) {
+            for (u32 x = 0; x < VGA_WIDTH; x++) {
+                VGA_MEMORY[(y - 1) * VGA_WIDTH + x] =
+                    VGA_MEMORY[y * VGA_WIDTH + x];
+            }
+        }
 
-    /* scroll screen up by one row */
-    for (u32 y = 1; y < VGA_HEIGHT; y++) {
+        // clear last line
         for (u32 x = 0; x < VGA_WIDTH; x++) {
-            VGA_MEMORY[(y - 1) * VGA_WIDTH + x] = VGA_MEMORY[y * VGA_WIDTH + x];
+            VGA_MEMORY[(VGA_HEIGHT - 1) * VGA_WIDTH + x] =
+                vga_entry(' ', console_color);
         }
     }
 
-    for (u32 x = 0; x < VGA_WIDTH; x++) {
-        VGA_MEMORY[(VGA_HEIGHT - 1) * VGA_WIDTH + x] = vga_entry(' ', console_color);
-    }
-        console_update_cursor();
-
+    console_update_cursor();
 }
 
 static void console_backspace(void) {
@@ -83,33 +84,31 @@ void console_clear(void) {
 void console_putc(char c) {
     if (c == '\n') {
         console_newline();
-
         return;
     }
 
     if (c == '\r') {
         console_col = 0;
         console_update_cursor();
-
         return;
     }
 
     if (c == '\b') {
         console_backspace();
         console_update_cursor();
-
         return;
     }
 
-    VGA_MEMORY[console_row * VGA_WIDTH + console_col] = vga_entry((unsigned char)c, console_color);
+    VGA_MEMORY[console_row * VGA_WIDTH + console_col] =
+        vga_entry((unsigned char)c, console_color);
+
     console_col++;
 
     if (console_col >= VGA_WIDTH) {
         console_newline();
-        return;
-    }
+    } else {
         console_update_cursor();
-
+    }
 }
 
 void console_write(const char* str) {
@@ -143,7 +142,7 @@ void console_write_dec(u32 value) {
 
     while (value > 0) {
         buffer[i++] = '0' + (value % 10);
-        value /= 10;
+        value = value / 10;
     }
 
     while (i > 0) {

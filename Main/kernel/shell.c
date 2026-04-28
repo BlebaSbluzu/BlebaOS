@@ -4,7 +4,9 @@
 #include "panic.h"
 #include "memory.h"
 #include "paging.h"
-
+#include "scheduler.h"
+#include "test.h"
+#include "fs.h"
 static char shell_buffer[128];
 static int shell_length = 0;
 
@@ -32,7 +34,7 @@ static int str_starts_with(const char* str, const char* prefix) {
 
 static void shell_execute(const char* command) {
     if (str_equal(command, "help")) {
-        console_write("Commands: help, clear, about, ticks, panic, echo, cowsay, mem, alloc\n");
+        console_write("Commands: help, clear, about, ticks, panic, echo, cowsay, mem, alloc, pagefault, multitask, stoptask, tasks, ls, touch, write, cat, rm, runtests\n");
     }
     else if (str_equal(command, "clear")) {
         console_clear();
@@ -44,6 +46,7 @@ static void shell_execute(const char* command) {
     console_write("            ||----w |\n");
     console_write("            ||     ||\n");
 }
+
 else if (str_starts_with(command, "cowsay ")) {
     const char* msg = command + 7;
 
@@ -73,9 +76,6 @@ else if (str_equal(command, "mem")) {
     console_write_dec(memory_get_heap_used());
     console_write(" bytes\n");
 }
-
-
-
 else if (str_starts_with(command, "alloc ")) {
     const char* num = command + 6;
     u32 size = 0;
@@ -112,6 +112,79 @@ else if (str_starts_with(command, "alloc ")) {
         console_write(command + 5);
         console_write("\n");
     }
+    else if (str_equal(command, "pagefault")) {
+    volatile u32* bad_ptr = (u32*)0x00500000;
+    *bad_ptr = 1234;
+    }
+else if (str_equal(command, "runtests")) {
+    tests_run_all();
+}
+else if (str_equal(command, "ls")) {
+    fs_list();
+}
+else if (str_starts_with(command, "touch ")) {
+    const char* name = command + 6;
+
+    if (fs_create(name)) {
+        console_write("File created.\n");
+    } else {
+        console_write("Could not create file.\n");
+    }
+}
+else if (str_starts_with(command, "cat ")) {
+    const char* name = command + 4;
+    const char* data = fs_read(name);
+
+    if (data == NULL) {
+        console_write("File not found.\n");
+    } else {
+        console_write(data);
+        console_write("\n");
+    }
+}
+else if (str_starts_with(command, "rm ")) {
+    const char* name = command + 3;
+
+    if (fs_delete(name)) {
+        console_write("File deleted.\n");
+    } else {
+        console_write("File not found.\n");
+    }
+}
+else if (str_starts_with(command, "write ")) {
+    const char* rest = command + 6;
+
+    char filename[FS_MAX_NAME];
+    int i = 0;
+
+    while (*rest && *rest != ' ' && i < FS_MAX_NAME - 1) {
+        filename[i++] = *rest++;
+    }
+
+    filename[i] = '\0';
+
+    if (*rest == ' ') {
+        rest++;
+    }
+
+    if (filename[0] == '\0' || rest[0] == '\0') {
+        console_write("Usage: write <file> <text>\n");
+    } else if (fs_write(filename, rest)) {
+        console_write("File written.\n");
+    } else {
+        console_write("File not found.\n");
+    }
+}
+else if (str_equal(command, "multitask")) {
+    task_start_demo();
+}
+else if (str_equal(command, "stoptask")) {
+    task_stop_demo();
+}
+else if (str_equal(command, "tasks")) {
+    task_list();
+}
+
     else if (command[0] == '\0') {
         /* do nothing */
     }
